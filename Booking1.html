@@ -48,7 +48,7 @@
     </style>
 </head>
 <body>
-    <div class="container">
+    <div class="container" id="user-list">
         <h2>Register Yourself</h2>
         <form id="registration-form">
             <div class="form-group">
@@ -83,46 +83,46 @@
         </form>
     </div>
 
-    <script>
-       // JavaScript for form submission and message display
-const form = document.getElementById('registration-form');
-const successMessage = document.querySelector('.success-message');
-const errorMessage = document.querySelector('.error-message');
 
-form.addEventListener('submit', function (e) {
-    e.preventDefault();
 
-    // Get user details
-    const name = document.getElementById('name').value;
-    const email = document.getElementById('email').value;
-    const password = document.getElementById('password').value;
-    const gender = document.querySelector('input[name="gender"]:checked').value;
+<script>
+    // Function to render the user list in the UI
+    function renderUserList(users) {
+        const userListDiv = document.getElementById('user-list');
+        userListDiv.innerHTML = ''; // Clear the previous user list
 
-    // Create a user object
-    const user = {
-        name,
-        email,
-        password,
-        gender
-    };
+        users.forEach((user, index) => {
+            const userDiv = document.createElement('div');
+            userDiv.innerHTML = `
+                <p><strong>Name:</strong> ${user.name}</p>
+                <p><strong>Email:</strong> ${user.email}</p>
+                <p><strong>Gender:</strong> ${user.gender}</p>
+                <button onclick="deleteUser(${index})">Delete</button>
+            `;
+            userListDiv.appendChild(userDiv);
+        });
+    }
 
-    // Retrieve existing users from local storage or create an empty array
-    const existingUsers = JSON.parse(localStorage.getItem('users')) || [];
+    // Function to delete a user
+    function deleteUser(index) {
+        const existingUsers = JSON.parse(localStorage.getItem('users')) || [];
 
-    // Add the new user to the array of existing users
-    existingUsers.push(user);
+        if (index >= 0 && index < existingUsers.length) {
+            // Remove the user from the array
+            existingUsers.splice(index, 1);
 
-    // Store the updated array back in local storage
-    localStorage.setItem('users', JSON.stringify(existingUsers));
+            // Update local storage with the modified user list
+            localStorage.setItem('users', JSON.stringify(existingUsers));
 
-    // Show a success message
-    successMessage.classList.remove('hidden');
-    errorMessage.classList.add('hidden');
+            // Re-render the user list in the UI
+            renderUserList(existingUsers);
+        }
+    }
 
-    // Reset the form
-    form.reset();
-});
+    // Initial rendering of the user list when the page loads
+    const initialUsers = JSON.parse(localStorage.getItem('users')) || [];
+    renderUserList(initialUsers);
+</script>
 
-    </script>
 </body>
 </html>
