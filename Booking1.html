@@ -48,81 +48,92 @@
     </style>
 </head>
 <body>
-    <div class="container" id="user-list">
-        <h2>Register Yourself</h2>
-        <form id="registration-form">
-            <div class="form-group">
-                <label for="name">Name:</label>
-                <input type="text" id="name" name="name" required>
-            </div>
+    <!-- Add this inside the user rendering loop to display an Edit button -->
+<button onclick="editUser(${index})">Edit</button>
 
-            <div class="form-group">
-                <label for="email">Email:</label>
-                <input type="email" id="email" name="email" required>
-            </div>
+<!-- Add a div to display the edit form -->
+<div id="edit-form" class="hidden">
+    <h2>Edit User</h2>
+    <form id="edit-user-form">
+        <input type="hidden" id="edit-index" name="index">
+        <div class="form-group">
+            <label for="edit-name">Name:</label>
+            <input type="text" id="edit-name" name="name" required>
+        </div>
 
-            <div class="form-group">
-                <label for="password">Password:</label>
-                <input type="password" id="password" name="password" required>
-            </div>
+        <div class="form-group">
+            <label for="edit-email">Email:</label>
+            <input type="email" id="edit-email" name="email" required>
+        </div>
 
-            <div class="form-group radio-group">
-                <label>Gender:</label>
-                <input type="radio" id="male" name="gender" value="male" required>
-                <label for="male">Male</label>
-                <input type="radio" id="female" name="gender" value="female" required>
-                <label for="female">Female</label>
-            </div>
+        <div class="form-group radio-group">
+            <label>Gender:</label>
+            <input type="radio" id="edit-male" name="gender" value="male" required>
+            <label for="edit-male">Male</label>
+            <input type="radio" id="edit-female" name="gender" value="female" required>
+            <label for="edit-female">Female</label>
+        </div>
 
-            <div class="form-group">
-                <button type="submit">Register</button>
-            </div>
-
-            <p class="success-message hidden">Registration successful! Welcome aboard.</p>
-            <p class="error-message hidden">Error! Please check your input and try again.</p>
-        </form>
-    </div>
-
-
+        <div class="form-group">
+            <button type="submit">Save</button>
+            <button type="button" onclick="cancelEdit()">Cancel</button>
+        </div>
+    </form>
+</div>
 
 <script>
-    // Function to render the user list in the UI
-    function renderUserList(users) {
-        const userListDiv = document.getElementById('user-list');
-        userListDiv.innerHTML = ''; // Clear the previous user list
+    // Function to edit a user's details
+    function editUser(index) {
+        const existingUsers = JSON.parse(localStorage.getItem('users')) || [];
+        const user = existingUsers[index];
 
-        users.forEach((user, index) => {
-            const userDiv = document.createElement('div');
-            userDiv.innerHTML = `
-                <p><strong>Name:</strong> ${user.name}</p>
-                <p><strong>Email:</strong> ${user.email}</p>
-                <p><strong>Gender:</strong> ${user.gender}</p>
-                <button onclick="deleteUser(${index})">Delete</button>
-            `;
-            userListDiv.appendChild(userDiv);
-        });
+        // Display the edit form and pre-fill the user's details
+        document.getElementById('edit-name').value = user.name;
+        document.getElementById('edit-email').value = user.email;
+        document.getElementById(`edit-${user.gender}`).checked = true;
+        document.getElementById('edit-index').value = index;
+
+        const editForm = document.getElementById('edit-form');
+        editForm.classList.remove('hidden');
     }
 
-    // Function to delete a user
-    function deleteUser(index) {
+    // Function to cancel the edit
+    function cancelEdit() {
+        const editForm = document.getElementById('edit-form');
+        editForm.classList.add('hidden');
+    }
+
+    // Function to save the edited user details
+    document.getElementById('edit-user-form').addEventListener('submit', function (e) {
+        e.preventDefault();
+
+        const index = parseInt(document.getElementById('edit-index').value);
+        const name = document.getElementById('edit-name').value;
+        const email = document.getElementById('edit-email').value;
+        const gender = document.querySelector('input[name="gender"]:checked').value;
+
         const existingUsers = JSON.parse(localStorage.getItem('users')) || [];
 
         if (index >= 0 && index < existingUsers.length) {
-            // Remove the user from the array
-            existingUsers.splice(index, 1);
+            // Update the user's details
+            existingUsers[index] = {
+                name,
+                email,
+                gender
+            };
 
             // Update local storage with the modified user list
             localStorage.setItem('users', JSON.stringify(existingUsers));
 
             // Re-render the user list in the UI
             renderUserList(existingUsers);
-        }
-    }
 
-    // Initial rendering of the user list when the page loads
-    const initialUsers = JSON.parse(localStorage.getItem('users')) || [];
-    renderUserList(initialUsers);
+            // Hide the edit form
+            cancelEdit();
+        }
+    });
 </script>
 
+    
 </body>
 </html>
